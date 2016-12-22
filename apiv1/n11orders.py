@@ -1,4 +1,3 @@
-
 # -*- coding: utf-8 -*-
 # encoding=utf8
 
@@ -15,22 +14,22 @@ from rest_framework.decorators import api_view
 from apiv1 import helpers
 from apiv1 import formprocessors
 
+import logging
+logger = logging.getLogger(__name__)
+
 @csrf_exempt
 @api_view(['POST'])
 def getOrdersCount(request):
-	aryFormKeys = ["apikey","secretkey","status"]
-	formValues = formprocessors.getFormValues(request,"POST",aryFormKeys)
-	apikey, secretkey, status = [formValues.get(k) for k in aryFormKeys]
+	try:
+		aryFormKeys = ["apikey","secretkey","status"]
+		formValues = formprocessors.getFormValues(request,"POST",aryFormKeys)
+		apikey, secretkey, status = [formValues.get(k) for k in aryFormKeys]
 
-	if apikey is not None and secretkey is not None and status is not None:
-		wsdl = 'https://api.n11.com/ws/OrderService.wsdl'
-		try:
+		if apikey is not None and secretkey is not None and status is not None:
+			wsdl = 'https://api.n11.com/ws/OrderService.wsdl'
 			from suds.client import Client
 			client = Client(wsdl)
-			#cache = client.options.cache
-			#cache.setduration(days=10)
 
-			#RECORD COUNT
 			auth = {
 				'appKey':apikey,
             	'appSecret':secretkey
@@ -77,38 +76,38 @@ def getOrdersCount(request):
 				returnData = {"status":status,"recordcount":"","success":0,"message":"Toplam kayit adedi alinamadi [inf0x12903]"}
 			else:
 				returnData = {"status":status,"recordcount":recordCount,"success":1,"message":""}
-		except Exception, Argument:
-			errorText = ""
-			if Argument is None:
-				# Try/Catch den donen arguman degeri null.
-				errorText = "Hata aciklamasi elde edilemedi"
-			else:
-				errorText = str(Argument)
+		else:
+			returnData = {"status":"","recordcount":"","success":0,"message":"API parametrelerini kontrol ediniz.[inf0x12903]"}
+	except Exception, Argument:
+		errorText = ""
+		if Argument is None:
+			# Try/Catch den donen arguman degeri null.
+			errorText = "Hata aciklamasi elde edilemedi"
+		else:
+			errorText = str(Argument)
 
-			returnData = {"status":"","recordcount":"","success":0,"message":errorText}
-		finally:
-			print "++++ finally finally finally ++++"
-	else:
-		returnData = {"status":"","recordcount":"","success":0,"message":"API parametrelerini kontrol ediniz.[inf0x12903]"}
+		returnData = {"status":"","recordcount":"","success":0,"message":errorText}
+	finally:
+		if returnData["success"] == 0:
+			logger.error(returnData["message"], exc_info=True, extra={'request': request})
 
-
-	return helpers.JSONResponse(returnData)
+		return helpers.JSONResponse(returnData)
 
 @csrf_exempt
 @api_view(['POST'])
 def getOrders(request):
-	aryFormKeys = ["apikey","secretkey","status"]
-	formValues = formprocessors.getFormValues(request,"POST",aryFormKeys)
-	apikey, secretkey, status = [formValues.get(k) for k in aryFormKeys]
+	try:
+		aryFormKeys = ["apikey","secretkey","status"]
+		formValues = formprocessors.getFormValues(request,"POST",aryFormKeys)
+		apikey, secretkey, status = [formValues.get(k) for k in aryFormKeys]
 
-	if apikey is not None and secretkey is not None and status is not None:
-		wsdl = 'https://api.n11.com/ws/OrderService.wsdl'
-		try:
+		if apikey is not None and secretkey is not None and status is not None:
+			wsdl = 'https://api.n11.com/ws/OrderService.wsdl'
+
 			import scio
 			import urllib2
 			client = scio.Client(urllib2.urlopen(wsdl))
 
-			#RECORD COUNT
 			fauth = client.type.Authentication()
 			fauth.appKey = apikey
 			fauth.appSecret = secretkey
@@ -176,19 +175,30 @@ def getOrders(request):
 						returnData = {"status":"","recordcount":"","orders":"","success":0,"message":"API den cevap success donmedi " + str(rstatus)}
 			else:
 				returnData = {"status":"","recordcount":"","success":0,"message":"API den cevap donmedi","orders":""}
-		except Exception, Argument:
-			errorText = ""
-			if Argument is None:
-				# Try/Catch den donen arguman degeri null.
-				errorText = "Hata aciklamasi elde edilemedi [err0x12904]"
+		else:
+			returnData = {"status":"","recordcount":"","success":0,"message":"API parametrelerini kontrol ediniz.[inf0x12903]","orders":""}
+	except Exception, Argument:
+		errorText = ""
+		if Argument is None:
+			# Try/Catch den donen arguman degeri null.
+			errorText = "Hata aciklamasi elde edilemedi [err0x12904]"
+		else:
+			errorText = str(Argument) + "[err0x12905]"
+
+	   	returnData = {"status":"","recordcount":"","success":0,"message":errorText,"orders":""}
+	finally:
+		if returnData["success"] == 0:
+			message = ""
+			if "message" in returnData:
+				message = returnData["message"]
 			else:
-				errorText = str(Argument) + "[err0x12905]"
+				message = "returnData bilgisi gelmedi veya icerisinde message key i bulunmuyor"
+				
+			logger.error(message, exc_info=True, extra={'request': request})
+			logger.debug(message, exc_info=True, extra={'request': request})
+			logger.info(message, exc_info=True, extra={'request': request})
+			logger.warning(message, exc_info=True, extra={'request': request})
+			logger.critical(message, exc_info=True, extra={'request': request})
+			logger.exception(message, exc_info=True, extra={'request': request})
 
-		   	returnData = {"status":"","recordcount":"","success":0,"message":errorText,"orders":""}
-		finally:
-			pass
-	else:
-		returnData = {"status":"","recordcount":"","success":0,"message":"API parametrelerini kontrol ediniz.[inf0x12903]","orders":""}
-
-
-	return helpers.JSONResponse(returnData)
+		return helpers.JSONResponse(returnData)

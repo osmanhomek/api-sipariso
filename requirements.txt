@@ -3,3 +3,4 @@ djangorestframework
 lxml
 scio
 suds
+raven
