@@ -135,7 +135,7 @@ import os
 import raven
 RAVEN_CONFIG = {
     'dsn': 'https://ada94d0a0b094360aac278ed95f0b920:4a5c4735e24a40e9842602a324479b08@sentry.io/124319',
-    'release': raven.fetch_git_sha(os.path.dirname(os.pardir)),
+    'release': '12378d50bf358fb8a9804f21e7f7353bd15f2378',
 }
 
 LOGGING = {

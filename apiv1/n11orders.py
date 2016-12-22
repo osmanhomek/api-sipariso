@@ -187,13 +187,19 @@ def getOrders(request):
 
 	   	returnData = {"status":"","recordcount":"","success":0,"message":errorText,"orders":""}
 	finally:
+		print ("++++++++++++++++++++")
+		import osxy
+		import raven
+		print (raven.fetch_git_sha(os.path.dirname(os.pardir)))
+		print (os.path.dirname(os.pardir))
+		print ("++++++++++++++++++++")
 		if returnData["success"] == 0:
 			message = ""
 			if "message" in returnData:
 				message = returnData["message"]
 			else:
 				message = "returnData bilgisi gelmedi veya icerisinde message key i bulunmuyor"
-				
+
 			logger.error(message, exc_info=True, extra={'request': request})
 			logger.debug(message, exc_info=True, extra={'request': request})
 			logger.info(message, exc_info=True, extra={'request': request})
