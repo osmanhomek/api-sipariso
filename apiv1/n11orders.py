@@ -187,12 +187,6 @@ def getOrders(request):
 
 	   	returnData = {"status":"","recordcount":"","success":0,"message":errorText,"orders":""}
 	finally:
-		print ("++++++++++++++++++++")
-		import osxy
-		import raven
-		print (raven.fetch_git_sha(os.path.dirname(os.pardir)))
-		print (os.path.dirname(os.pardir))
-		print ("++++++++++++++++++++")
 		if returnData["success"] == 0:
 			message = ""
 			if "message" in returnData:
