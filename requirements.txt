@@ -1,0 +1,4 @@
+django >=1.10,<1.11
+lxml
+scio
+suds
