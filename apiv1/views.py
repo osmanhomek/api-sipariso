@@ -27,7 +27,10 @@ def login(request):
 			import pymongo
 			from pymongo import MongoClient
 
-			client = MongoClient('mongodb://apin11:5gh4SAkj316T@ds055772.mlab.com:55772/sipariso')
+			import os
+			mongo_url = os.getenv("MONGORUL")
+
+			client = MongoClient(mongo_url)
 			db = client.sipariso
 			users = db.users
 			userResult = users.find_one({"username":fusername,"password":fpassword})
