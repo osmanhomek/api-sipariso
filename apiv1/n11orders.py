@@ -21,11 +21,11 @@ logger = logging.getLogger(__name__)
 @api_view(['POST'])
 def getOrdersCount(request):
 	try:
-		aryFormKeys = ["apikey","secretkey","status"]
+		aryFormKeys = ["apikey","secretkey","customerid","status"]
 		formValues = formprocessors.getFormValues(request,"POST",aryFormKeys)
-		apikey, secretkey, status = [formValues.get(k) for k in aryFormKeys]
+		apikey, secretkey, customerid, status = [formValues.get(k) for k in aryFormKeys]
 
-		if apikey is not None and secretkey is not None and status is not None:
+		if apikey is not None and secretkey is not None and customerid is not None and status is not None :
 			wsdl = 'https://api.n11.com/ws/OrderService.wsdl'
 			from suds.client import Client
 			client = Client(wsdl)
