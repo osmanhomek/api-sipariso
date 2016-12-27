@@ -12,7 +12,6 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view
 
 from apiv1 import helpers
-from apiv1 import formprocessors
 
 import logging
 logger = logging.getLogger(__name__)
@@ -22,7 +21,7 @@ logger = logging.getLogger(__name__)
 def getOrdersCount(request):
 	try:
 		aryFormKeys = ["apikey","secretkey","customerid","status"]
-		formValues = formprocessors.getFormValues(request,"POST",aryFormKeys)
+		formValues = helpers.getFormValues(request,"POST",aryFormKeys)
 		apikey, secretkey, customerid, status = [formValues.get(k) for k in aryFormKeys]
 
 		if apikey is not None and secretkey is not None and customerid is not None and status is not None :

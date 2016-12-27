@@ -4,3 +4,4 @@ lxml
 scio
 suds
 raven
+pymongo
