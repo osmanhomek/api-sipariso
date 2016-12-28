@@ -136,7 +136,7 @@ import raven
 
 RAVEN_CONFIG = {
     'environment': 'production',
-    'dsn': 'https://ada94d0a0b094360aac278ed95f0b920:4a5c4735e24a40e9842602a324479b08@sentry.io/124319',
+    'dsn': os.getenv("SENTRY_DSN")
     'release': raven.fetch_git_sha(os.path.dirname(os.pardir)),
 }
 
