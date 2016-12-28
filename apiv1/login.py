@@ -17,19 +17,18 @@ from apiv1 import helpers
 @csrf_exempt
 @api_view(['POST'])
 def check(request):
-	try:
+    try:
 		formValues = helpers.getFormValues(request,"POST",["fusername","fpassword","fcustomer"])
 		fusername, fpassword, fcustomer = [formValues.get(k) for k in ["fusername","fpassword","fcustomer"]]
 		ggInfo = n11Info = hbInfo = ""
 		resultStatus,resultMessage = 0,None
-
 		if fusername is not None and fpassword is not None and fcustomer is not None:
 			ggInfo,n11Info,hbInfo,resultMessage = loginDB("sipariso",fusername,fpassword,fcustomer)
 		else:
 			resultMessage = "API parametrelerini kontrol ediniz [inf0x12903]"
-	except Exception, Argument:
+    except Exception, Argument:
 	   	resultMessage = "Hata aciklamasi elde edilemedi. Try/Catch den donen arguman degeri null. [err0x12904]" if Argument is None else str(Argument) + " [err0x12905]"
-	finally:
+    finally:
 		helpers.hlogger(resultMessage,request)
 		returnData = {
 			"success": "0" if resultMessage is not None else "1",
@@ -76,5 +75,4 @@ def loginDB(dbName,fusername,fpassword,fcustomer):
 	except Exception, Argument:
 	   	resultMessage = "Hata aciklamasi elde edilemedi. Try/Catch den donen arguman degeri null. [err0x12904]" if Argument is None else str(Argument) + " [err0x12905]"
 	finally:
-		helpers.hlogger(resultMessage,None)
 		return ggInfo,n11Info,hbInfo,resultMessage

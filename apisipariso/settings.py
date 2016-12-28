@@ -23,9 +23,9 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = '+jftvu@8-&ei279ti1&3dryqun6!1c+(ia+^bn7dpx9^s2@8tz'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = ["api.sipariso.com","206.142.242.66"]
+ALLOWED_HOSTS = ["api.sipariso.com","206.142.242.66","localhost"]
 
 # Application definition
 
@@ -107,7 +107,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Istanbul'
 
 USE_I18N = True
 
@@ -133,19 +133,25 @@ REST_FRAMEWORK = {
 
 import os
 import raven
+
 RAVEN_CONFIG = {
+    'environment': 'production',
     'dsn': 'https://ada94d0a0b094360aac278ed95f0b920:4a5c4735e24a40e9842602a324479b08@sentry.io/124319',
-    'release': '12378d50bf358fb8a9804f21e7f7353bd15f2378',
+    'release': raven.fetch_git_sha(os.path.dirname(os.pardir)),
 }
 
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': True,
     'root': {
-        'level': 'WARNING',
+        'level': 'INFO',
         'handlers': ['sentry'],
     },
     'formatters': {
+        'simple': {
+            'format': '%(asctime)s SENDER_NAME PROGRAM_NAME: %(message)s',
+            'datefmt': '%Y-%m-%dT%H:%M:%S',
+        },
         'verbose': {
             'format': '%(levelname)s %(asctime)s %(module)s '
                       '%(process)d %(thread)d %(message)s'
@@ -153,30 +159,25 @@ LOGGING = {
     },
     'handlers': {
         'sentry': {
-            'level': os.getenv('DJANGO_LOG_LEVEL'),
+            'level': 'INFO',
             'class': 'raven.contrib.django.raven_compat.handlers.SentryHandler',
-            'tags': {'custom-tag': 'x'},
-        },
-        'console': {
-            'level': os.getenv('DJANGO_LOG_LEVEL'),
-            'class': 'logging.StreamHandler',
             'formatter': 'verbose'
         },
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose'
+        }
     },
     'loggers': {
-        'django.db.backends': {
-            'level': 'ERROR',
-            'handlers': ['console'],
-            'propagate': False,
-        },
-        'raven': {
-            'level': os.getenv('DJANGO_LOG_LEVEL'),
-            'handlers': ['console'],
+        'apisipariso': {
+            'level': 'INFO',
+            'handlers': ['sentry','console'],
             'propagate': False,
         },
         'sentry.errors': {
-            'level': os.getenv('DJANGO_LOG_LEVEL'),
-            'handlers': ['console'],
+            'level': 'INFO',
+            'handlers': ['sentry','console'],
             'propagate': False,
         },
     },

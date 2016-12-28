@@ -3,7 +3,7 @@ from django.http import HttpResponse
 from rest_framework.renderers import JSONRenderer
 from rest_framework.parsers import JSONParser
 import logging
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("apisipariso")
 
 class JSONResponse(HttpResponse):
     def __init__(self, data, **kwargs):
@@ -53,7 +53,14 @@ def mongodb(dbName):
     finally:
         return db
 
+def suan():
+    from time import gmtime, strftime
+    return strftime("%Y-%m-%d %H:%M:%S", gmtime())
+
 def hlogger(resultMessage,request):
     if resultMessage is not None:
-        logger.error(resultMessage, exc_info=True, extra={'request': request})
-        logger.debug(resultMessage, exc_info=True, extra={'request': request})
+        #logger.error(str(zaman) + ":error:"+resultMessage)
+        #logger.debug(str(zaman) + ":debug:"+resultMessage)
+        logger.info(resultMessage, exc_info=True, extra={'request': request})
+        #logger.warning(str(zaman) + ":warning:"+resultMessage)
+        #logger.critical(str(zaman) + ":critical:"+resultMessage)
