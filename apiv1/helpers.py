@@ -42,7 +42,7 @@ def mongodb(dbName):
         import pymongo
         from pymongo import MongoClient
         import os
-        mongo_url = os.getenv("MONGORUL")
+        mongo_url = os.getenv("MONGO_URL")
         if mongo_url is not None:
             client = MongoClient(mongo_url)
             db = client[dbName]
