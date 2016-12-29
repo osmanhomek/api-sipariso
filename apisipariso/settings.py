@@ -20,7 +20,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/1.9/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '+jftvu@8-&ei279ti1&3dryqun6!1c+(ia+^bn7dpx9^s2@8tz'
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
@@ -131,12 +131,11 @@ REST_FRAMEWORK = {
     )
 }
 
-import os
 import raven
 
 RAVEN_CONFIG = {
     'environment': 'production',
-    'dsn': os.getenv("SENTRY_DSN")
+    'dsn': os.getenv("SENTRY_DSN"),
     'release': raven.fetch_git_sha(os.path.dirname(os.pardir)),
 }
 

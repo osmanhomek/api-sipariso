@@ -6,3 +6,4 @@ scio
 suds
 raven
 pymongo
+PyJWT

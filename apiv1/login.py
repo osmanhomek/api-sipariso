@@ -18,8 +18,8 @@ from apiv1 import helpers
 @api_view(['POST'])
 def check(request):
     try:
-		formValues = helpers.getFormValues(request,"POST",["fusername","fpassword","fcustomer"])
-		fusername, fpassword, fcustomer = [formValues.get(k) for k in ["fusername","fpassword","fcustomer"]]
+		formValues = helpers.getFormValues(request,"POST",["username","password","customerid"])
+		fusername, fpassword, fcustomer = [formValues.get(k) for k in ["username","password","customerid"]]
 		ggInfo = n11Info = hbInfo = ""
 		resultStatus,resultMessage = 0,None
 		if fusername is not None and fpassword is not None and fcustomer is not None:
@@ -34,6 +34,7 @@ def check(request):
 			"success": "0" if resultMessage is not None else "1",
 			"message": resultMessage,
 			"customer": fcustomer,
+            "token": loginTokenGen(fcustomer),
 			"accounts": "" if resultMessage is not None else {"gittigidiyor":ggInfo,"n11":n11Info,"hepsiburada":hbInfo}
 		}
 		return helpers.JSONResponse(returnData)
@@ -76,3 +77,6 @@ def loginDB(dbName,fusername,fpassword,fcustomer):
 	   	resultMessage = "Hata aciklamasi elde edilemedi. Try/Catch den donen arguman degeri null. [err0x12904]" if Argument is None else str(Argument) + " [err0x12905]"
 	finally:
 		return ggInfo,n11Info,hbInfo,resultMessage
+
+def loginTokenGen(fcustomer):
+    return helpers.tokenKeyGenerator(fcustomer,helpers.simdi())

@@ -96,86 +96,96 @@ def getOrdersCount(request):
 @api_view(['POST'])
 def getOrders(request):
 	try:
-		aryFormKeys = ["apikey","secretkey","status"]
-		formValues = formprocessors.getFormValues(request,"POST",aryFormKeys)
-		apikey, secretkey, status = [formValues.get(k) for k in aryFormKeys]
+		aryFormKeys = ["apikey","secretkey","customerid","status","token"]
+		formValues = helpers.getFormValues(request,"POST",aryFormKeys)
+		apikey, secretkey, customerid, status, token = [formValues.get(k) for k in aryFormKeys]
 
-		if apikey is not None and secretkey is not None and status is not None:
-			wsdl = 'https://api.n11.com/ws/OrderService.wsdl'
-
-			import scio
-			import urllib2
-			client = scio.Client(urllib2.urlopen(wsdl))
-
-			fauth = client.type.Authentication()
-			fauth.appKey = apikey
-			fauth.appSecret = secretkey
-
-			fperiod = client.type.OrderSearchPeriod()
-			fperiod.startDate = ""
-			fperiod.endDate = ""
-
-			fsearchData = client.type.OrderDataListRequest()
-			#fsearchData.productId = ''
-			fsearchData.status = status
-			fsearchData.buyerName = ""
-			fsearchData.orderNumber = ""
-			fsearchData.productSellerCode = ""
-			fsearchData.recipient = ""
-			fsearchData.sameDayDelivery = ""
-			fsearchData.period = fperiod
-
-			fpagingData = client.type.PagingData()
-			fpagingData.currentPage = 0
-			fpagingData.pageSize = 100
-			#fpagingData.totalCount = ""
-			#fpagingData.pageCount = ""
-
-			rresult = None
-			response = client.service.DetailedOrderList(auth=fauth, searchData=fsearchData, pagingData=fpagingData)
-			if hasattr(response,"result"):
-				rresult = response.result
-				if hasattr(rresult,"status"):
-					rstatus = str(rresult.status).strip()
-					if rstatus == "success":
-						if hasattr(response,"pagingData"):
-							pagingData = response.pagingData
-							if hasattr(pagingData,"totalCount"):
-								totalCount = pagingData.totalCount
-								if totalCount == 0:
-									returnData = {"status":status,"recordcount":totalCount,"success":1,"message":"islem basarili"}
-								else:
-									if hasattr(response,"orderList"):
-										orderList = response.orderList
-										if hasattr(orderList,"order"):
-											order = orderList.order
-											fullOrderData = []
-											for orderRec in order:
-												responseJson = {}
-												#RcreateDate, Rid, RorderNumber, RpaymentType, Rstatus, RtotalAmount = ""
-												if hasattr(orderRec,"createDate"): RcreateDate = str(orderRec.createDate)
-												if hasattr(orderRec,"id"): Rid = str(orderRec.id)
-												if hasattr(orderRec,"orderNumber"): RorderNumber = str(orderRec.orderNumber)
-												if hasattr(orderRec,"paymentType"): RpaymentType = str(orderRec.paymentType)
-												if hasattr(orderRec,"status"): Rstatus = str(orderRec.status)
-												if hasattr(orderRec,"totalAmount"): RtotalAmount = str(orderRec.totalAmount)
-
-												responseJson["createDate"] = RcreateDate
-												responseJson["orderid"] = Rid
-												responseJson["orderNumber"] = RorderNumber
-												responseJson["paymentType"] = RpaymentType
-												responseJson["orderstatus"] = Rstatus
-												responseJson["totalAmount"] = RtotalAmount
-
-												fullOrderData.append(responseJson)
-
-												returnData = {"status":"","recordcount":totalCount,"success":1,"orders":str(fullOrderData),"message":"islem basarili"}
-					else:
-						returnData = {"status":"","recordcount":"","orders":"","success":0,"message":"API den cevap success donmedi " + str(rstatus)}
-			else:
-				returnData = {"status":"","recordcount":"","success":0,"message":"API den cevap donmedi","orders":""}
+		if token is None or customerid is None:
+			returnData = {"status":"","recordcount":"","orders":"","success":0,"message":"Token degeri gonderilmedi"}
 		else:
-			returnData = {"status":"","recordcount":"","success":0,"message":"API parametrelerini kontrol ediniz.[inf0x12903]","orders":""}
+			token_check = helpers.tokenCheck(token)
+			if token_check["success"]==0:
+				returnData = {"status":"","recordcount":"","orders":"","success":0,"message":token_check["message"]}
+			else:
+				if apikey is not None and secretkey is not None and status is not None:
+					wsdl = 'https://api.n11.com/ws/OrderService.wsdl'
+
+					import scio
+					import urllib2
+					client = scio.Client(urllib2.urlopen(wsdl))
+
+					fauth = client.type.Authentication()
+					fauth.appKey = apikey
+					fauth.appSecret = secretkey
+
+					fperiod = client.type.OrderSearchPeriod()
+					fperiod.startDate = ""
+					fperiod.endDate = ""
+
+					fsearchData = client.type.OrderDataListRequest()
+					#fsearchData.productId = ''
+					fsearchData.status = status
+					fsearchData.buyerName = ""
+					fsearchData.orderNumber = ""
+					fsearchData.productSellerCode = ""
+					fsearchData.recipient = ""
+					fsearchData.sameDayDelivery = ""
+					fsearchData.period = fperiod
+
+					fpagingData = client.type.PagingData()
+					fpagingData.currentPage = 0
+					fpagingData.pageSize = 100
+					#fpagingData.totalCount = ""
+					#fpagingData.pageCount = ""
+
+					rresult = None
+					response = client.service.DetailedOrderList(auth=fauth, searchData=fsearchData, pagingData=fpagingData)
+					print ("****************")
+					print (response)
+					print ("****************")
+					if hasattr(response,"result"):
+						rresult = response.result
+						if hasattr(rresult,"status"):
+							rstatus = str(rresult.status).strip()
+							if rstatus == "success":
+								if hasattr(response,"pagingData"):
+									pagingData = response.pagingData
+									if hasattr(pagingData,"totalCount"):
+										totalCount = pagingData.totalCount
+										if totalCount == 0:
+											returnData = {"status":status,"recordcount":totalCount,"success":1,"message":"islem basarili"}
+										else:
+											if hasattr(response,"orderList"):
+												orderList = response.orderList
+												if hasattr(orderList,"order"):
+													order = orderList.order
+													fullOrderData = []
+													for orderRec in order:
+														responseJson = {}
+														#RcreateDate, Rid, RorderNumber, RpaymentType, Rstatus, RtotalAmount = ""
+														if hasattr(orderRec,"createDate"): RcreateDate = str(orderRec.createDate)
+														if hasattr(orderRec,"id"): Rid = str(orderRec.id)
+														if hasattr(orderRec,"orderNumber"): RorderNumber = str(orderRec.orderNumber)
+														if hasattr(orderRec,"paymentType"): RpaymentType = str(orderRec.paymentType)
+														if hasattr(orderRec,"status"): Rstatus = str(orderRec.status)
+														if hasattr(orderRec,"totalAmount"): RtotalAmount = str(orderRec.totalAmount)
+
+														responseJson["createDate"] = RcreateDate
+														responseJson["orderid"] = Rid
+														responseJson["orderNumber"] = RorderNumber
+														responseJson["paymentType"] = RpaymentType
+														responseJson["orderstatus"] = Rstatus
+														responseJson["totalAmount"] = RtotalAmount
+
+														fullOrderData.append(responseJson)
+
+														returnData = {"status":"","recordcount":totalCount,"success":1,"orders":str(fullOrderData),"message":"islem basarili"}
+							else:
+								returnData = {"status":"","recordcount":"","orders":"","success":0,"message":"API den cevap success donmedi " + str(rstatus)}
+					else:
+						returnData = {"status":"","recordcount":"","success":0,"message":"API den cevap donmedi","orders":""}
+				else:
+					returnData = {"status":"","recordcount":"","success":0,"message":"API parametrelerini kontrol ediniz.[inf0x12903]","orders":""}
 	except Exception, Argument:
 		errorText = ""
 		if Argument is None:

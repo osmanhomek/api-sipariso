@@ -12,6 +12,30 @@ class JSONResponse(HttpResponse):
         super(JSONResponse, self).__init__(content, **kwargs)
 
 ####HELPER
+def tokenKeyGenerator(keyname,keyvalue):
+    import jwt, os
+    return jwt.encode({keyname:keyvalue}, os.getenv("AUTH_TOKEN_KEY"), algorithm='HS256')
+
+def tokenCheck(encoded,customerid):
+    import jwt, os
+    returnData = {}
+    token_check = jwt.decode(encoded, os.getenv("AUTH_TOKEN_KEY"), algorithms=['HS256'])
+    if hasattr(token_check,customerid):
+        token_create_time = token_check[customerid]
+        simdi_time = simdi()
+        print ("****************")
+        print ("a::"+token_create_time)
+        print ("b::"+simdi_time)
+        zaman_farki = days_between(token_create_time, "%Y%m%d%H%M%S", simdi_time, "%Y%m%d%H%M%S")
+        if zaman_farki>os.getenv("TOKEN_TIME_SPAN"):
+            returnData = {"success":0,"message":"Token / Customer Id uyusmazligi"}
+        else:
+            returnData = {"success":1,"message":""}
+    else:
+        returnData = {"success":0,"message":"Token / Customer Id uyusmazligi"}
+
+    return returnData
+
 def generateSecretkey():
     length = 32
     chars = "AaBbCcDdEeFfGgHhJjKkMmNnPpQqRrSsTtUuVvWwXxYyZz23456789@#+"
@@ -56,6 +80,16 @@ def mongodb(dbName):
 def suan():
     from time import gmtime, strftime
     return strftime("%Y-%m-%d %H:%M:%S", gmtime())
+
+def simdi():
+    from time import gmtime, strftime
+    return strftime("%Y%m%d%H%M%S", gmtime())
+
+def days_between(d1, d1Format, d2, d2Format):
+    from datetime import datetime
+    d1 = datetime.strptime(d1, d1Format)
+    d2 = datetime.strptime(d2, d2Format)
+    return abs((d2 - d1).seconds)/60
 
 def hlogger(resultMessage,request):
     if resultMessage is not None:
