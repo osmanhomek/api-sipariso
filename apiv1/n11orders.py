@@ -96,6 +96,8 @@ def getOrdersCount(request):
 @api_view(['POST'])
 def getOrders(request):
 	try:
+		returnData = {"status":"","recordcount":"","success":0,"message":"","orders":""}
+
 		aryFormKeys = ["apikey","secretkey","customerid","status","token"]
 		formValues = helpers.getFormValues(request,"POST",aryFormKeys)
 		apikey, secretkey, customerid, status, token = [formValues.get(k) for k in aryFormKeys]
@@ -103,7 +105,7 @@ def getOrders(request):
 		if token is None or customerid is None:
 			returnData = {"status":"","recordcount":"","orders":"","success":0,"message":"Token degeri gonderilmedi"}
 		else:
-			token_check = helpers.tokenCheck(token)
+			token_check = helpers.tokenCheck(token,customerid)
 			if token_check["success"]==0:
 				returnData = {"status":"","recordcount":"","orders":"","success":0,"message":token_check["message"]}
 			else:
@@ -134,15 +136,12 @@ def getOrders(request):
 
 					fpagingData = client.type.PagingData()
 					fpagingData.currentPage = 0
-					fpagingData.pageSize = 100
-					#fpagingData.totalCount = ""
-					#fpagingData.pageCount = ""
+					fpagingData.pageSize = 1
+					fpagingData.totalCount = 100
+					fpagingData.pageCount = 1
 
 					rresult = None
 					response = client.service.DetailedOrderList(auth=fauth, searchData=fsearchData, pagingData=fpagingData)
-					print ("****************")
-					print (response)
-					print ("****************")
 					if hasattr(response,"result"):
 						rresult = response.result
 						if hasattr(rresult,"status"):
@@ -180,13 +179,19 @@ def getOrders(request):
 														fullOrderData.append(responseJson)
 
 														returnData = {"status":"","recordcount":totalCount,"success":1,"orders":str(fullOrderData),"message":"islem basarili"}
+												else:
+													print ("::::::::::orderorderorderorder:::")
+											else:
+												print ("::::::::::orderListorderListorderList:::")
 							else:
-								returnData = {"status":"","recordcount":"","orders":"","success":0,"message":"API den cevap success donmedi " + str(rstatus)}
+								returnData = {"status":"","recordcount":"","orders":"","success":0,"message":"n11:" + str(rresult.errorMessage)}
 					else:
 						returnData = {"status":"","recordcount":"","success":0,"message":"API den cevap donmedi","orders":""}
 				else:
 					returnData = {"status":"","recordcount":"","success":0,"message":"API parametrelerini kontrol ediniz.[inf0x12903]","orders":""}
 	except Exception, Argument:
+		print ("::::::::::ExceptionException")
+		print ("::::::::::ExceptionException")
 		errorText = ""
 		if Argument is None:
 			# Try/Catch den donen arguman degeri null.

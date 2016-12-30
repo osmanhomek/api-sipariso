@@ -11,7 +11,7 @@ class JSONResponse(HttpResponse):
         kwargs['content_type'] = 'application/json'
         super(JSONResponse, self).__init__(content, **kwargs)
 
-####HELPER
+####HELPERS
 def tokenKeyGenerator(keyname,keyvalue):
     import jwt, os
     return jwt.encode({keyname:keyvalue}, os.getenv("AUTH_TOKEN_KEY"), algorithm='HS256')
@@ -20,15 +20,12 @@ def tokenCheck(encoded,customerid):
     import jwt, os
     returnData = {}
     token_check = jwt.decode(encoded, os.getenv("AUTH_TOKEN_KEY"), algorithms=['HS256'])
-    if hasattr(token_check,customerid):
+    if customerid in token_check.keys():
         token_create_time = token_check[customerid]
         simdi_time = simdi()
-        print ("****************")
-        print ("a::"+token_create_time)
-        print ("b::"+simdi_time)
         zaman_farki = days_between(token_create_time, "%Y%m%d%H%M%S", simdi_time, "%Y%m%d%H%M%S")
-        if zaman_farki>os.getenv("TOKEN_TIME_SPAN"):
-            returnData = {"success":0,"message":"Token / Customer Id uyusmazligi"}
+        if zaman_farki>int(os.getenv("TOKEN_TIME_SPAN")):
+            returnData = {"success":0,"message":"Token degeri pasif durumda. Token degerinin aktif kalma suresi " + str(os.getenv("TOKEN_TIME_SPAN")) + "dk. dir."}
         else:
             returnData = {"success":1,"message":""}
     else:
